@@ -10,6 +10,25 @@ body {
     margin: 0;
 }
 
+h4, p {
+    margin-top: 16px;
+    margin-bottom: 16px;
+}
+
+button {
+    margin-top: 16px;
+}
+
+.grid.sm {
+    row-gap: 8px;
+    grid-template-columns: 50% 50%;
+    margin-right: 16px;
+    p, button {
+        margin-top: 0;
+        margin-bottom: 0;
+    }
+}
+
 main {
     margin-top: 64px;
     padding: 16px;

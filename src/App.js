@@ -9,6 +9,8 @@ import {
 import { appStore, onAppMount } from './state/app';
 import { Header } from './components/Header';
 import { Home } from './components/Home';
+import { Account } from './components/Account';
+import Modal from './components/Modal';
 
 import './css/modal-ui.css';
 import './App.scss';
@@ -27,11 +29,12 @@ const App = () => {
 	useEffect(onMount, []);
 
 	const routeArgs = {
-		state, update
+		state, update, wallet
 	}
 
 	return (
 		<div>
+			<Modal {...{ state, update }} />
 			<Header {...{ pathname, menu, wallet, update }} />
 			{
 				wallet &&
@@ -41,20 +44,7 @@ const App = () => {
 					wallet.accountId ?
 					/* Account Paths */
 					<>
-						<Route path="/account" element={
-							<>
-								<p>Signed in as: {wallet.accountId}</p>
-								<button onClick={() => {
-									wallet.signOut()
-									navigate('/')
-								}}>Sign Out</button>
-							</>
-						} />
-						<Route path="/about" element={
-							<>
-								<p>App is dope</p>
-							</>
-						} />
+						<Route path="/account" element={<Account {...routeArgs} />} />
 						<Route path="/" element={<Home {...routeArgs} />} />
 					</>
 								
@@ -62,11 +52,6 @@ const App = () => {
 					:
 					/* Public Paths */
 					<>
-						<Route path="/about" element={
-							<>
-								<p>App is dope</p>
-							</>
-						} />
 						<Route path="/" element={
 							<>
 								<p>Please sign in to get started</p>

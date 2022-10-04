@@ -1,4 +1,4 @@
-const contractName = 'dev-1646457590371-14990916266580';
+const contractName = 'v1.keypom.testnet';
 
 module.exports = function getConfig(network = 'testnet') {
 	let config = {
