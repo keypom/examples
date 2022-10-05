@@ -3,14 +3,13 @@ import {
 	Routes,
 	Route,
 	useLocation,
-	useNavigate,
 } from "react-router-dom";
 
 import { appStore, onAppMount } from './state/app';
 import { Header } from './components/Header';
 import { Home } from './components/Home';
 import { Account } from './components/Account';
-import Modal from './components/Modal';
+import { Modal } from './components/Modal';
 
 import './css/modal-ui.css';
 import './App.scss';
@@ -20,7 +19,6 @@ const App = () => {
 
 	const { app, wallet } = state
 	const { menu } = app
-	const navigate = useNavigate();
 	const { pathname } = useLocation();
 
 	const onMount = () => {

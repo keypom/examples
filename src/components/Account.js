@@ -1,10 +1,13 @@
-
+import {
+	useNavigate,
+} from "react-router-dom";
 import { ROOT_KEY } from "../state/app"
-import { get, set, file } from '../utils/store'
+import { set, file } from '../utils/store'
 import { generateSeedPhrase } from "near-seed-phrase"
 
 export const Account = ({ state, update, wallet }) => {
 
+	const navigate = useNavigate();
 	const { rootKey } = state
 
 	return <>
