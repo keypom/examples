@@ -24,6 +24,59 @@ export const Home = ({ state, update, wallet }) => {
 
 	const { near, drops, rootKey } = state
 
+
+	const createNEARDrop = async (values) => {
+		console.log(values)
+
+		const DEPOSIT_PER_USE = parseNearAmount(values.Value.toString());
+		const NUM_KEYS = parseInt(values['Number of Drops'].toString())
+		const DROP_METADATA = Date.now().toString() // unique identifier for keys
+
+		const {
+			DROP_CONFIG,
+			ATTACHED_GAS_FROM_WALLET,
+			STORAGE_REQUIRED,
+		} = simpleDrop;
+
+		let requiredDeposit = await estimateRequiredDeposit(
+			near,
+			DEPOSIT_PER_USE,
+			NUM_KEYS,
+			DROP_CONFIG.uses_per_key,
+			ATTACHED_GAS_FROM_WALLET,
+			STORAGE_REQUIRED,
+		)
+
+		let keyPairs = [], pubKeys = [];
+		for (var i = 0; i < NUM_KEYS; i++) {
+			const keyPair = await genKey(rootKey, DROP_METADATA, i)
+			keyPairs.push(keyPair)
+			pubKeys.push(keyPair.publicKey.toString());
+		}
+
+		/// redirect with mynearwallet
+		const res = wallet.signAndSendTransactions({
+			transactions: [{
+				receiverId: 'v1.keypom.testnet',
+				actions: [{
+					type: 'FunctionCall',
+					params: {
+						methodName: 'create_drop',
+						args: {
+							public_keys: pubKeys,
+							deposit_per_use: DEPOSIT_PER_USE,
+							config: DROP_CONFIG,
+							metadata: JSON.stringify(DROP_METADATA)
+						},
+						gas: '100000000000000',
+						deposit: requiredDeposit,
+					}
+				}]
+			}]
+		})
+	}
+
+
 	const onMount = async () => {
 		const drops = await wallet.viewFunction({
 			contractId,
@@ -60,7 +113,7 @@ export const Home = ({ state, update, wallet }) => {
 		{drops.length > 0 ? <>
 			<h4>Your Drops</h4>
 			{
-				drops.map(({ drop_id, keyPairs }, i) => <div key={i}>
+				drops.map(({ drop_id, keyPairs, keys }, i) => <div key={i}>
 					<p>Drop ID: {drop_id}</p>
 					<h4>Keys</h4>
 					{keyPairs.map(({ publicKey, secretKey }, i) => <div className="grid sm" key={i}>
@@ -103,62 +156,11 @@ export const Home = ({ state, update, wallet }) => {
 
 		<Form {...{
 			data: {
-				Value: 0.1,
+				Value: 1,
 				['Number of Drops']: 1,
 			},
 			submitLabel: 'Create Drop',
-			submit: async (values) => {
-
-				console.log(values)
-
-				const DEPOSIT_PER_USE = parseNearAmount(values.Value.toString());
-				const NUM_KEYS = parseInt(values['Number of Drops'].toString())
-				const DROP_METADATA = Date.now().toString() // unique identifier for keys
-
-				const {
-					DROP_CONFIG,
-					ATTACHED_GAS_FROM_WALLET,
-				} = simpleDrop;
-
-				let requiredDeposit = await estimateRequiredDeposit(
-					near,
-					DEPOSIT_PER_USE,
-					NUM_KEYS,
-					DROP_CONFIG.uses_per_key,
-					ATTACHED_GAS_FROM_WALLET,
-					null,
-					null
-				)
-
-				let keyPairs = [], pubKeys = [];
-				for (var i = 0; i < NUM_KEYS; i++) {
-					const keyPair = await genKey(rootKey, DROP_METADATA, i)
-					keyPairs.push(keyPair)
-					pubKeys.push(keyPair.publicKey.toString());
-				}
-
-				/// redirect with mynearwallet
-				const res = wallet.signAndSendTransactions({
-					transactions: [{
-						receiverId: 'v1.keypom.testnet',
-						actions: [{
-							type: 'FunctionCall',
-							params: {
-								methodName: 'create_drop',
-								args: {
-									public_keys: pubKeys,
-									deposit_per_use: DEPOSIT_PER_USE,
-									config: DROP_CONFIG,
-									metadata: JSON.stringify(DROP_METADATA)
-								},
-								gas: '100000000000000',
-								deposit: requiredDeposit,
-							}
-						}]
-					}]
-				})
-
-			}
+			submit: createNEARDrop
 		}} />
 
 		{/* <p>Config</p>
