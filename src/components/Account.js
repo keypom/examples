@@ -32,7 +32,7 @@ export const Account = ({ state, update, wallet }) => {
 
 	return <>
 		<h4>Balance</h4>
-		<p>{ formatNearAmount(balance, 4) }</p>
+		<p>{formatNearAmount(balance, 4)}</p>
 		<button className="outline" onClick={() => {
 			const res = wallet.signAndSendTransactions({
 				transactions: [{
@@ -51,8 +51,14 @@ export const Account = ({ state, update, wallet }) => {
 		<h4>Root Key</h4>
 		{rootKey
 			? <>
-<button className="outline" onClick={() => window.prompt('Copy this somewhere safe', rootKey)}>Copy</button>
-<button className="outline" onClick={() => file('KeypomRootKey.txt', rootKey)}>Save</button>
+				<button className="outline" onClick={() => window.prompt('Copy this somewhere safe! Do NOT lose it!', rootKey)}>Copy</button>
+				<button className="outline" onClick={() => file('KeypomRootKey.txt', rootKey)}>Save as File</button>
+				<button className="outline" onClick={() => {
+					const seedPhrase = window.prompt('WARNING! First save your existing root key or you will NOT be able to share any links!')
+					if (!seedPhrase || seedPhrase.length === 0 || seedPhrase.split(' ').filter((w) => w.length > 1).length !== 12) return alert('invalid key')
+					set(ROOT_KEY, seedPhrase)
+					update('rootKey', seedPhrase)
+				}}>!!! Update Key !!!</button>
 			</>
 			: <button className="outline" onClick={() => {
 				const { seedPhrase } = generateSeedPhrase()
