@@ -41,7 +41,7 @@ const estimateRequiredDeposit = async (
     numKeys,
     usesPerKey,
     attachedGas,
-    storage = parseNearAmount("0.01"),
+    storage = parseNearAmount("0.034"),
     fcData = null,
     ftData = null,
 ) => {

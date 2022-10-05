@@ -6,6 +6,7 @@ import { estimateRequiredDeposit } from './keypom-utils'
 import { share } from '../utils/mobile'
 import { generateSeedPhrase } from 'near-seed-phrase';
 
+import { contractId, receiverId } from '../state/app';
 const {
 	KeyPair,
 	utils: { format: { parseNearAmount, formatNearAmount } },
@@ -17,8 +18,6 @@ const genKey = async (rootKey, meta, nonce) => {
 	const { secretKey } = generateSeedPhrase(hash)
 	return KeyPair.fromString(secretKey)
 }
-const contractId = 'v1.keypom.testnet';
-const receiverId = contractId;
 
 export const Home = ({ state, update, wallet }) => {
 

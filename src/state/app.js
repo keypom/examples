@@ -4,7 +4,8 @@ import { initNear } from './near';
 import { get } from '../utils/store'
 
 export const ROOT_KEY = '__ROOT_KEY'
-
+export const contractId = 'v1.keypom.testnet';
+export const receiverId = contractId;
 // example
 const initialState = {
 	app: {
