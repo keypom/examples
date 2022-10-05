@@ -71,7 +71,7 @@ export const Home = ({ state, update, wallet }) => {
 							<button className="outline" onClick={() => {
 								const link = `https://testnet.mynearwallet.com/linkdrop/${contractId}/${secretKey}`
 								const { mobile } = share(link)
-								if (!mobile) alert('Ticket Link Copied')
+								if (!mobile) alert('Link Copied')
 							}}>Share Link</button>
 						</div>
 					</div>)}
