@@ -11,6 +11,7 @@ import { Menu } from 'react-feather';
 
 const Links = ({ update, wallet }) => {
 	const hideMenu = () => update('app.menu', false)
+
 	return <nav>
 		<Link onClick={hideMenu} to="/">Home</Link>
 		{
@@ -18,6 +19,7 @@ const Links = ({ update, wallet }) => {
 				<Link onClick={hideMenu} to="/account">Account</Link>
 			</>
 		}
+		<a onClick={() => window.open('https://github.com/keypom/examples')}>GH</a>
 	</nav>
 }
 
