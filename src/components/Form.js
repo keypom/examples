@@ -16,6 +16,8 @@ const genFields = (data, values, onChange) => {
 		}
 		if (typeof v === 'number') {
 			input.type = 'number'
+			input.min = 0.1
+			input.step = 0.1
 		} else if (typeof v === 'boolean') {
 			input.type = 'checkbox'
 			input.checked = values[k]
