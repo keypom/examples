@@ -137,7 +137,7 @@ export const viewFunction = async ({
 		throw new Error("viewFunction error: methodName undefined");
 	}
 	const account = await getAccount(network);
-	return account.viewFunction(contractId, methodName, args)
+	return account.viewFunction(_contractId || contractId, methodName, args)
 };
 
 export const functionCall = async ({

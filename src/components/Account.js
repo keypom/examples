@@ -49,6 +49,7 @@ export const Account = ({ state, update, wallet }) => {
 			})
 		}}>Withdraw Balance</button>
 		<h4>Root Key</h4>
+		<p>Used to generate your links. If you lose it, you can still delete your drop and reclaim funds.</p>
 		{rootKey
 			? <>
 				<button className="outline" onClick={() => window.prompt('Copy this somewhere safe! Do NOT lose it!', rootKey)}>Copy</button>

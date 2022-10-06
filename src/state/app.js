@@ -13,6 +13,7 @@ const initialState = {
 		menu: false,
 	},
 	drops: [],
+	ftBalance: '0',
 	rootKey: get(ROOT_KEY)
 };
 
