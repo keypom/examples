@@ -8,7 +8,7 @@ const homedir = require("os").homedir();
 const GAS_PER_CCC = 5000000000000; // 5 TGas
 const RECEIPT_GAS_COST = 2500000000000; // 2.5 TGas
 const YOCTO_PER_GAS = 100000000; // 100 million
-const ATTACHED_GAS_FROM_WALLET = 100000000000000; // 100 TGas
+export const ATTACHED_GAS_FROM_WALLET = 100000000000000; // 100 TGas
 
 /// How much yoctoNEAR it costs to store 1 access key
 const ACCESS_KEY_STORAGE = new BN("1000000000000000000000");
@@ -35,33 +35,36 @@ const initiateNearConnection = async (network) => {
 };
 
 // Initiate the connection to the NEAR blockchain.
-const estimateRequiredDeposit = async (
+const estimateRequiredDeposit = async ({
     near,
     depositPerUse,
     numKeys,
     usesPerKey,
     attachedGas,
     storage = parseNearAmount("0.034"),
+    keyStorage = parseNearAmount("0.0065"),
     fcData = null,
     ftData = null,
-) => {
-    let totalRequiredStorage = new BN(storage);
+}) => {
+    const numKeysBN = new BN(numKeys)
+    
+    let totalRequiredStorage = new BN(storage).add(new BN(keyStorage).mul(numKeysBN));
     console.log('totalRequiredStorage: ', totalRequiredStorage.toString())
 
     let actualAllowance = estimatePessimisticAllowance(attachedGas);
     console.log('actualAllowance: ', actualAllowance.toString())
 
-    let totalAllowance = actualAllowance.mul(new BN(numKeys));
+    let totalAllowance = actualAllowance.mul(numKeysBN);
     console.log('totalAllowance: ', totalAllowance.toString())
 
-    let totalAccessKeyStorage = ACCESS_KEY_STORAGE.mul(new BN(numKeys));
+    let totalAccessKeyStorage = ACCESS_KEY_STORAGE.mul(numKeysBN);
     console.log('totalAccessKeyStorage: ', totalAccessKeyStorage.toString())
 
     let {numNoneFcs, depositRequiredForFcDrops} = getNoneFcsAndDepositRequired(fcData, usesPerKey);
-    let totalDeposits = new BN(depositPerUse).mul(new BN(usesPerKey - numNoneFcs)).mul(new BN(numKeys));
+    let totalDeposits = new BN(depositPerUse).mul(new BN(usesPerKey - numNoneFcs)).mul(numKeysBN);
     console.log('totalDeposits: ', totalDeposits.toString())
 
-    let totalDepositsForFc = depositRequiredForFcDrops.mul(new BN(numKeys));
+    let totalDepositsForFc = depositRequiredForFcDrops.mul(numKeysBN);
     console.log('totalDepositsForFc: ', totalDepositsForFc.toString())
 
     let requiredDeposit = totalRequiredStorage

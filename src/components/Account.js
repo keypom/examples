@@ -31,23 +31,7 @@ export const Account = ({ state, update, wallet }) => {
 	}, [])
 
 	return <>
-		<h4>Balance in Keypom Contract</h4>
-		<p>{formatNearAmount(balance, 4)}</p>
-		<button className="outline" onClick={() => {
-			const res = wallet.signAndSendTransactions({
-				transactions: [{
-					receiverId: 'v1.keypom.testnet',
-					actions: [{
-						type: 'FunctionCall',
-						params: {
-							methodName: 'withdraw_from_balance',
-							args: {},
-							gas: '100000000000000',
-						}
-					}]
-				}]
-			})
-		}}>Withdraw Balance</button>
+		
 		<h4>Root Key</h4>
 		<p>Used to generate your links. If you lose it, you can still delete your drop and reclaim funds.</p>
 		{rootKey
@@ -67,11 +51,31 @@ export const Account = ({ state, update, wallet }) => {
 				update('rootKey', seedPhrase)
 			}}>Create Root Key</button>
 		}
+
 		<h4>Wallet</h4>
 		<p>Signed in as: {wallet.accountId}</p>
 		<button onClick={() => {
 			wallet.signOut()
 			navigate('/')
 		}}>Sign Out</button>
+
+		<h4>Balance in Keypom Contract</h4>
+		<p>Usually zero, but might have small amounts of NEAR if you deleted a large drop.</p>
+		<p>{formatNearAmount(balance, 4)}</p>
+		<button className="outline" onClick={() => {
+			const res = wallet.signAndSendTransactions({
+				transactions: [{
+					receiverId: 'v1.keypom.testnet',
+					actions: [{
+						type: 'FunctionCall',
+						params: {
+							methodName: 'withdraw_from_balance',
+							args: {},
+							gas: '100000000000000',
+						}
+					}]
+				}]
+			})
+		}}>Withdraw Balance</button>
 	</>
 }

@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react'
 import * as nearAPI from 'near-api-js';
+import { BN } from 'bn.js'
 import { Form } from './Form'
 import { simpleDrop } from '../configs/simple'
 import { ftDrop, FT_CONTRACT_ID } from '../configs/ft'
-import { estimateRequiredDeposit } from './keypom-utils'
+import { estimateRequiredDeposit, ATTACHED_GAS_FROM_WALLET } from '../configs/keypom-utils'
 import { share } from '../utils/mobile'
 import { generateSeedPhrase } from 'near-seed-phrase';
 
@@ -73,18 +74,19 @@ export const Home = ({ state, update, wallet }) => {
 
 		const {
 			DROP_CONFIG,
-			ATTACHED_GAS_FROM_WALLET,
 			STORAGE_REQUIRED,
 		} = simpleDrop;
 
-		let requiredDeposit = await estimateRequiredDeposit(
+		let requiredDeposit = await estimateRequiredDeposit({
 			near,
-			DEPOSIT_PER_USE,
-			NUM_KEYS,
-			DROP_CONFIG.uses_per_key,
-			ATTACHED_GAS_FROM_WALLET,
-			STORAGE_REQUIRED,
-		)
+			depositPerUse: DEPOSIT_PER_USE,
+			numKeys: NUM_KEYS,
+			usesPerKey: DROP_CONFIG.uses_per_key,
+			attachedGas: ATTACHED_GAS_FROM_WALLET,
+			storage: STORAGE_REQUIRED,
+		})
+
+		// console.log(formatNearAmount(requiredDeposit, 6))
 
 		let keyPairs = [], pubKeys = [];
 		for (var i = 0; i < NUM_KEYS; i++) {
@@ -157,7 +159,6 @@ export const Home = ({ state, update, wallet }) => {
 
 		const {
 			DROP_CONFIG,
-			ATTACHED_GAS_FROM_WALLET,
 			STORAGE_REQUIRED,
 			FT_DATA,
 		} = ftDrop;
@@ -165,16 +166,15 @@ export const Home = ({ state, update, wallet }) => {
 		FT_DATA.balance_per_use = parseNearAmount(values['FT Value'].toString());
 		FT_DATA.sender_id = wallet.accountId
 
-		let requiredDeposit = await estimateRequiredDeposit(
+		let requiredDeposit = await estimateRequiredDeposit({
 			near,
-			DEPOSIT_PER_USE,
-			NUM_KEYS,
-			DROP_CONFIG.uses_per_key,
-			ATTACHED_GAS_FROM_WALLET,
-			STORAGE_REQUIRED,
-			null,
-			FT_DATA
-		)
+			depositPerUse: DEPOSIT_PER_USE,
+			numKeys: NUM_KEYS,
+			usesPerKey: DROP_CONFIG.uses_per_key,
+			attachedGas: ATTACHED_GAS_FROM_WALLET,
+			storage: STORAGE_REQUIRED,
+			ftData: FT_DATA,
+		})
 
 		// console.log(formatNearAmount(requiredDeposit))
 
@@ -216,7 +216,7 @@ export const Home = ({ state, update, wallet }) => {
 						methodName: 'ft_transfer_call',
 						args: {
 							receiver_id: contractId,
-							amount: FT_DATA.balance_per_use,
+							amount: new BN(FT_DATA.balance_per_use).mul(new BN(NUM_KEYS)).toString(),
 							msg: nextDropId.toString(),
 						},
 						gas: '50000000000000',
@@ -236,7 +236,7 @@ export const Home = ({ state, update, wallet }) => {
 		{drops.length > 0 ? <>
 			<h4>Your Drops</h4>
 			{
-				drops.map(({ drop_id, keyPairs, keys }, i) => <div key={i}>
+				drops.map(({ drop_id, drop_type, keyPairs, keys }, i) => <div key={i}>
 					<p>Drop ID: {drop_id}</p>
 					<h4>Keys</h4>
 					{keyPairs.map(({ publicKey, secretKey }, i) => <div className="grid sm" key={i}>
@@ -252,20 +252,42 @@ export const Home = ({ state, update, wallet }) => {
 						</div>
 					</div>)}
 					<button className="outline" onClick={() => {
+						const actions = []
+						if (drop_type.FungibleToken) {
+							actions.push({
+								type: 'FunctionCall',
+								params: {
+									methodName: 'refund_assets',
+									args: {
+										drop_id,
+									},
+									gas: '100000000000000',
+								}
+							})
+						}
+						actions.push({
+							type: 'FunctionCall',
+							params: {
+								methodName: 'delete_keys',
+								args: {
+									drop_id,
+									public_keys: keys.map(({ pk }) => pk),
+								},
+								gas: '100000000000000',
+							}
+						}, {
+							type: 'FunctionCall',
+							params: {
+								methodName: 'withdraw_from_balance',
+								args: {},
+								gas: '100000000000000',
+							}
+						})
+
 						const res = wallet.signAndSendTransactions({
 							transactions: [{
 								receiverId,
-								actions: [{
-									type: 'FunctionCall',
-									params: {
-										methodName: 'delete_keys',
-										args: {
-											drop_id,
-											public_keys: keys.map(({ pk }) => pk),
-										},
-										gas: '100000000000000',
-									}
-								}]
+								actions
 							}]
 						})
 					}}>Delete Drop (reclaim funds)</button>

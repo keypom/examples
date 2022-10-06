@@ -4,8 +4,7 @@ const KEYPOM_CONTRACT = "v1.keypom.testnet"
 const FUNDING_ACCOUNT_ID = "benjiman.testnet";
 const NETWORK_ID = "testnet";
 const DEPOSIT_PER_USE = parseNearAmount("1");
-// const STORAGE_REQUIRED = parseNearAmount('0.034')
-const STORAGE_REQUIRED = parseNearAmount('0.1')
+const STORAGE_REQUIRED = parseNearAmount('0.0075')
 const NUM_KEYS = 1;
 
 const DROP_CONFIG = {
