@@ -107,7 +107,7 @@ export const Home = ({ state, update, wallet }) => {
 							config: DROP_CONFIG,
 							metadata: JSON.stringify(DROP_METADATA)
 						},
-						gas: '100000000000000',
+						gas: '300000000000000',
 						deposit: requiredDeposit,
 					}
 				}]
@@ -204,7 +204,7 @@ export const Home = ({ state, update, wallet }) => {
 							metadata: JSON.stringify(DROP_METADATA),
 							ft_data: FT_DATA,
 						},
-						gas: '100000000000000',
+						gas: '250000000000000',
 						deposit: requiredDeposit,
 					}
 				}]
@@ -219,7 +219,7 @@ export const Home = ({ state, update, wallet }) => {
 							amount: FT_DATA.balance_per_use,
 							msg: nextDropId.toString(),
 						},
-						gas: '100000000000000',
+						gas: '50000000000000',
 						deposit: '1',
 					}
 				}]
@@ -282,6 +282,16 @@ export const Home = ({ state, update, wallet }) => {
 				['NEAR Value']: 1,
 				['Number of Drops']: 1,
 			},
+			minMax: {
+				['NEAR Value']: {
+					min: 0.2,
+					step: 0.1
+				},
+				['Number of Drops']: {
+					min: 1,
+					max: 50
+				},
+			},
 			submitLabel: 'Create NEAR Drop',
 			submit: createSimpleDrop
 		}} />
@@ -296,6 +306,16 @@ export const Home = ({ state, update, wallet }) => {
 				['FT Value']: 10,
 				['NEAR Value']: 0.2,
 				['Number of Drops']: 1,
+			},
+			minMax: {
+				['NEAR Value']: {
+					min: 0.2,
+					step: 0.1
+				},
+				['Number of Drops']: {
+					min: 1,
+					max: 50
+				},
 			},
 			submitLabel: 'Create FT Drop',
 			submit: createFTDrop

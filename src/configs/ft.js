@@ -6,7 +6,7 @@ const NETWORK_ID = "testnet";
 const DEPOSIT_PER_USE = parseNearAmount("1");
 const NUM_KEYS = 1;
 export const FT_CONTRACT_ID = "ft.keypom.testnet";
-const STORAGE_REQUIRED = parseNearAmount('0.05')
+const STORAGE_REQUIRED = parseNearAmount('0.1')
 
 const FT_DATA = {
     // Contract ID of the fungible token

@@ -31,7 +31,7 @@ export const Account = ({ state, update, wallet }) => {
 	}, [])
 
 	return <>
-		<h4>Balance</h4>
+		<h4>Balance in Keypom Contract</h4>
 		<p>{formatNearAmount(balance, 4)}</p>
 		<button className="outline" onClick={() => {
 			const res = wallet.signAndSendTransactions({
