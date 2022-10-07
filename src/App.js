@@ -8,6 +8,9 @@ import {
 import { appStore, onAppMount } from './state/app';
 import { Header } from './components/Header';
 import { Home } from './components/Home';
+import { NEAR } from './components/NEAR';
+import { FT } from './components/FT';
+import { NFT } from './components/NFT';
 import { Account } from './components/Account';
 import { Modal } from './components/Modal';
 
@@ -43,6 +46,9 @@ const App = () => {
 					/* Account Paths */
 					<>
 						<Route path="/account" element={<Account {...routeArgs} />} />
+						<Route path="/near" element={<NEAR {...routeArgs} />} />
+						<Route path="/ft" element={<FT {...routeArgs} />} />
+						<Route path="/nft" element={<NFT {...routeArgs} />} />
 						<Route path="/" element={<Home {...routeArgs} />} />
 					</>
 								

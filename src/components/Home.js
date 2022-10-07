@@ -46,186 +46,13 @@ export const Home = ({ state, update, wallet }) => {
 			drop.keyPairs = await Promise.all(drop.keys.map((_, i) => genKey(rootKey, drop.metadata.replaceAll(`\"`, ``), i)))
 		}))
 
-		const ftBalance = await wallet.viewFunction({
-			contractId: FT_CONTRACT_ID,
-			methodName: 'ft_balance_of',
-			args: {
-				account_id: wallet.accountId
-			}
-		})
-
 		console.log('drops', drops)
 
 		update('drops', drops)
-		update('ftBalance', ftBalance)
 	}
 	useEffect(() => {
 		onMount()
 	}, [])
-
-	/// Main Event Handlers
-
-	const createSimpleDrop = async (values) => {
-		console.log(values)
-
-		const DEPOSIT_PER_USE = parseNearAmount(values['NEAR Value'].toString());
-		const NUM_KEYS = parseInt(values['Number of Drops'].toString())
-		const DROP_METADATA = Date.now().toString() // unique identifier for keys
-
-		const {
-			DROP_CONFIG,
-			STORAGE_REQUIRED,
-		} = simpleDrop;
-
-		let requiredDeposit = await estimateRequiredDeposit({
-			near,
-			depositPerUse: DEPOSIT_PER_USE,
-			numKeys: NUM_KEYS,
-			usesPerKey: DROP_CONFIG.uses_per_key,
-			attachedGas: ATTACHED_GAS_FROM_WALLET,
-			storage: STORAGE_REQUIRED,
-		})
-
-		// console.log(formatNearAmount(requiredDeposit, 6))
-
-		let keyPairs = [], pubKeys = [];
-		for (var i = 0; i < NUM_KEYS; i++) {
-			const keyPair = await genKey(rootKey, DROP_METADATA, i)
-			keyPairs.push(keyPair)
-			pubKeys.push(keyPair.publicKey.toString());
-		}
-
-		/// redirect with mynearwallet
-		const res = wallet.signAndSendTransactions({
-			transactions: [{
-				receiverId: 'v1.keypom.testnet',
-				actions: [{
-					type: 'FunctionCall',
-					params: {
-						methodName: 'create_drop',
-						args: {
-							public_keys: pubKeys,
-							deposit_per_use: DEPOSIT_PER_USE,
-							config: DROP_CONFIG,
-							metadata: JSON.stringify(DROP_METADATA)
-						},
-						gas: '300000000000000',
-						deposit: requiredDeposit,
-					}
-				}]
-			}]
-		})
-	}
-
-	const handleGetFTs = async () => {
-		const res = wallet.signAndSendTransactions({
-			transactions: [{
-				receiverId: FT_CONTRACT_ID,
-				actions: [{
-					type: 'FunctionCall',
-					params: {
-						methodName: 'storage_deposit',
-						args: {
-							account_id: wallet.accountId,
-						},
-						gas: '100000000000000',
-						deposit: parseNearAmount('0.1')
-					}
-				}]
-			}, {
-				receiverId: FT_CONTRACT_ID,
-				actions: [{
-					type: 'FunctionCall',
-					params: {
-						methodName: 'ft_mint',
-						args: {
-							account_id: wallet.accountId,
-							// The max amount of tokens an account can receive PER `ft_transfer` call is 10
-							amount: parseNearAmount("100")
-						},
-						gas: '100000000000000',
-					}
-				}]
-			}]
-		})
-	}
-
-	const createFTDrop = async (values) => {
-		console.log(values)
-
-		const DEPOSIT_PER_USE = parseNearAmount(values['NEAR Value'].toString());
-		const NUM_KEYS = parseInt(values['Number of Drops'].toString())
-		const DROP_METADATA = Date.now().toString() // unique identifier for keys
-
-		const {
-			DROP_CONFIG,
-			STORAGE_REQUIRED,
-			FT_DATA,
-		} = ftDrop;
-
-		FT_DATA.balance_per_use = parseNearAmount(values['FT Value'].toString());
-		FT_DATA.sender_id = wallet.accountId
-
-		let requiredDeposit = await estimateRequiredDeposit({
-			near,
-			depositPerUse: DEPOSIT_PER_USE,
-			numKeys: NUM_KEYS,
-			usesPerKey: DROP_CONFIG.uses_per_key,
-			attachedGas: ATTACHED_GAS_FROM_WALLET,
-			storage: STORAGE_REQUIRED,
-			ftData: FT_DATA,
-		})
-
-		// console.log(formatNearAmount(requiredDeposit))
-
-		let keyPairs = [], pubKeys = [];
-		for (var i = 0; i < NUM_KEYS; i++) {
-			const keyPair = await genKey(rootKey, DROP_METADATA, i)
-			keyPairs.push(keyPair)
-			pubKeys.push(keyPair.publicKey.toString());
-		}
-
-		/// redirect with mynearwallet
-		const nextDropId = await wallet.viewFunction({
-			contractId,
-			methodName: 'get_next_drop_id'
-		})
-		const res = wallet.signAndSendTransactions({
-			transactions: [{
-				receiverId: 'v1.keypom.testnet',
-				actions: [{
-					type: 'FunctionCall',
-					params: {
-						methodName: 'create_drop',
-						args: {
-							public_keys: pubKeys,
-							deposit_per_use: DEPOSIT_PER_USE,
-							config: DROP_CONFIG,
-							metadata: JSON.stringify(DROP_METADATA),
-							ft_data: FT_DATA,
-						},
-						gas: '250000000000000',
-						deposit: requiredDeposit,
-					}
-				}]
-			}, {
-				receiverId: FT_CONTRACT_ID,
-				actions: [{
-					type: 'FunctionCall',
-					params: {
-						methodName: 'ft_transfer_call',
-						args: {
-							receiver_id: contractId,
-							amount: new BN(FT_DATA.balance_per_use).mul(new BN(NUM_KEYS)).toString(),
-							msg: nextDropId.toString(),
-						},
-						gas: '50000000000000',
-						deposit: '1',
-					}
-				}]
-			}]
-		})
-	}
 
 	/// Render
 
@@ -253,7 +80,7 @@ export const Home = ({ state, update, wallet }) => {
 					</div>)}
 					<button className="outline" onClick={() => {
 						const actions = []
-						if (drop_type.FungibleToken) {
+						if (drop_type.FungibleToken || drop_type.NonFungibleToken) {
 							actions.push({
 								type: 'FunctionCall',
 								params: {
@@ -296,52 +123,6 @@ export const Home = ({ state, update, wallet }) => {
 		</>
 		:
 		<h4>No Drops Yet</h4>}
-
-		<h4>Create NEAR Drop</h4>
-
-		<Form {...{
-			data: {
-				['NEAR Value']: 1,
-				['Number of Drops']: 1,
-			},
-			minMax: {
-				['NEAR Value']: {
-					min: 0.2,
-					step: 0.1
-				},
-				['Number of Drops']: {
-					min: 1,
-					max: 50
-				},
-			},
-			submitLabel: 'Create NEAR Drop',
-			submit: createSimpleDrop
-		}} />
-
-		<h4>Create FT Drop</h4>
-
-		<p>Balance { formatNearAmount(ftBalance, 4) }</p>
-		<button className="outline" onClick={handleGetFTs}>Get 100 FTs</button>
-
-		<Form {...{
-			data: {
-				['FT Value']: 10,
-				['NEAR Value']: 0.2,
-				['Number of Drops']: 1,
-			},
-			minMax: {
-				['NEAR Value']: {
-					min: 0.2,
-					step: 0.1
-				},
-				['Number of Drops']: {
-					min: 1,
-					max: 50
-				},
-			},
-			submitLabel: 'Create FT Drop',
-			submit: createFTDrop
-		}} />
 
 	</div>
 }

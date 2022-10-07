@@ -14,6 +14,7 @@ const initialState = {
 	},
 	drops: [],
 	ftBalance: '0',
+	nftBalance: [],
 	rootKey: get(ROOT_KEY)
 };
 

@@ -1,10 +1,8 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 const genFields = ({data, values, minMax, onValueChange}) => {
 	return Object.entries(data).map(([k, v]) => {
 		if (/__/.test(k)) return null
-
-		
 
 		const input = {
 			id: k,
@@ -38,7 +36,7 @@ const genFields = ({data, values, minMax, onValueChange}) => {
 	})
 }
 
-export const Form = ({ data, onChange, submit, submitLabel, minMax }) => {
+export const Form = ({ data, onChange, submit, submitLabel, minMax, submitDisabled = false }) => {
 
 	const [values, setValues] = useState({ ...data })
 	const onValueChange = (k, v) => {
@@ -51,7 +49,7 @@ export const Form = ({ data, onChange, submit, submitLabel, minMax }) => {
 		<div className="row">
 			{genFields({data, values, minMax, onValueChange})}
 		</div>
-		{ submit && <button className="outline button-primary" onClick={() => {
+		{ submit && <button className="outline button-primary" disabled={submitDisabled} onClick={() => {
 
 			/// validation
 			let error = null

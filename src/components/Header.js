@@ -1,8 +1,6 @@
 import React from 'react'
 import {
-	Routes,
-	Route,
-	Link
+	Link,
 } from "react-router-dom";
 
 import './Header.scss';
@@ -16,6 +14,9 @@ const Links = ({ update, wallet }) => {
 		<Link onClick={hideMenu} to="/">Home</Link>
 		{
 			wallet?.accountId && <>
+				<Link onClick={hideMenu} to="/near">NEAR</Link>
+				<Link onClick={hideMenu} to="/ft">FT</Link>
+				<Link onClick={hideMenu} to="/nft">NFT</Link>
 				<Link onClick={hideMenu} to="/account">Account</Link>
 			</>
 		}
@@ -27,7 +28,7 @@ export const Header = ({ pathname, menu, wallet, update }) => {
 	return <header>
 		<div>
 			<p>
-				Keypom Examples { pathname.length > 1 && '/ ' + pathname.substring(1) }
+				<Link to="/">Keypom Examples</Link> { pathname.length > 1 && '/ ' + pathname.substring(1) }
 			</p>
 		</div>
 		<div>
