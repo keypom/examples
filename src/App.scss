@@ -31,8 +31,10 @@ button {
 }
 
 main {
+    margin: auto;
     margin-top: 64px;
     padding: 16px;
+    max-width: 600px;
 }
 
 a:focus {

@@ -60,6 +60,11 @@ export const Home = ({ state, update, wallet }) => {
 
 	return <div>
 
+		<h4>About</h4>
+		
+		<p>Example app for developers interested in using Keypom in their apps.</p>
+		<p>Testnet only. Click "GH" for source.</p>
+
 		{drops.length > 0 ? <>
 			<h4>Your Drops</h4>
 			{
@@ -122,7 +127,11 @@ export const Home = ({ state, update, wallet }) => {
 			}
 		</>
 		:
-		<h4>No Drops Yet</h4>}
+		<>
+			<h4>No Drops Yet.</h4>
+			<p>Click NEAR, FT, or NFT to explore!</p>
+		</>
+		}
 
 	</div>
 }
